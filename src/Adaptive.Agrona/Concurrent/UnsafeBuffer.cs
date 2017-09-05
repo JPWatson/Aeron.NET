@@ -369,7 +369,12 @@ namespace Adaptive.Agrona.Concurrent
         //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+#if DEBUG
+        public virtual long GetLong(int index)
+#else
         public long GetLong(int index)
+#endif
         {
             BoundsCheck0(index, BitUtil.SIZE_OF_LONG);
 

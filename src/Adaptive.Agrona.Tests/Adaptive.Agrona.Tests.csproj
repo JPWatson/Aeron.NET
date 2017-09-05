@@ -71,6 +71,8 @@
     <Compile Include="Collections\ArrayUtilTests.cs" />
     <Compile Include="Collections\CollectionUtilTests.cs" />
     <Compile Include="Concurrent\Broadcast\BroadcastReceiverTest.cs" />
+    <Compile Include="Concurrent\Broadcast\BroadcastTransmitterTest.cs" />
+    <Compile Include="Concurrent\Broadcast\BroadcastWorkflowTest.cs" />
     <Compile Include="Concurrent\CountersManagerTest.cs" />
     <Compile Include="Concurrent\RingBuffer\ManyToOneRingBufferTest.cs" />
     <Compile Include="EndianessConverterTests.cs" />

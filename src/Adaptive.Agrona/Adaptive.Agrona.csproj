@@ -87,6 +87,7 @@
     <Compile Include="Concurrent\AtomicReference.cs" />
     <Compile Include="Concurrent\Broadcast\BroadcastBufferDescriptor.cs" />
     <Compile Include="Concurrent\Broadcast\BroadcastReceiver.cs" />
+    <Compile Include="Concurrent\Broadcast\BroadcastTransmitter.cs" />
     <Compile Include="Concurrent\Broadcast\CopyBroadcastReceiver.cs" />
     <Compile Include="Concurrent\Broadcast\RecordDescriptor.cs" />
     <Compile Include="Concurrent\BusySpinIdleStrategy.cs" />

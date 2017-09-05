@@ -84,24 +84,24 @@ namespace Adaptive.Agrona.Concurrent.Broadcast
         {
             var messagesReceived = 0;
             var receiver = _receiver;
-            var lastSeenLappedCount = receiver.LappedCount();
+            var lastSeenLappedCount = receiver.LappedCount;
 
             if (receiver.ReceiveNext())
             {
-                if (lastSeenLappedCount != receiver.LappedCount())
+                if (lastSeenLappedCount != receiver.LappedCount)
                 {
                     throw new InvalidOperationException("Unable to keep up with broadcast buffer");
                 }
 
-                var length = receiver.Length();
+                var length = receiver.Length;
                 var capacity = _scratchBuffer.Capacity;
                 if (length > capacity)
                 {
                     throw new InvalidOperationException($"Buffer required length of {length:D} but only has {capacity:D}");
                 }
 
-                var msgTypeId = receiver.TypeId();
-                _scratchBuffer.PutBytes(0, receiver.Buffer(), receiver.Offset(), length);
+                var msgTypeId = receiver.TypeId;
+                _scratchBuffer.PutBytes(0, receiver.Buffer, receiver.Offset, length);
 
                 if (!receiver.Validate())
                 {

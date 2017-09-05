@@ -32,13 +32,13 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
         private static readonly int TailCounterIndex = Capacity + BroadcastBufferDescriptor.TailCounterOffset;
         private static readonly int LatestCounterIndex = Capacity + BroadcastBufferDescriptor.LatestCounterOffset;
 
-        private IAtomicBuffer _buffer;
+        private UnsafeBuffer _buffer;
         private BroadcastReceiver _broadcastReceiver;
 
         [SetUp]
         public void SetUp()
         {
-            _buffer = A.Fake<IAtomicBuffer>();
+            _buffer = A.Fake<UnsafeBuffer>();
             A.CallTo(() => _buffer.Capacity).Returns(TotalBufferLength);
             _broadcastReceiver = new BroadcastReceiver(_buffer);
         }
@@ -46,7 +46,7 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
         [Test]
         public void ShouldCalculateCapacityForBuffer()
         {
-            Assert.AreEqual(Capacity, _broadcastReceiver.Capacity());
+            Assert.AreEqual(Capacity, _broadcastReceiver.Capacity);
         }
 
         [Test]
@@ -64,7 +64,7 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
         [Test]
         public void ShouldNotBeLappedBeforeReception()
         {
-            Assert.AreEqual(0, _broadcastReceiver.LappedCount());
+            Assert.AreEqual(0, _broadcastReceiver.LappedCount);
         }
 
         [Test]
@@ -89,10 +89,10 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
             A.CallTo(() => _buffer.GetInt(RecordDescriptor.GetTypeOffset(recordOffset))).Returns(MsgTypeID);
 
             Assert.True(_broadcastReceiver.ReceiveNext());
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
 
             Assert.True(_broadcastReceiver.Validate());
 
@@ -121,17 +121,17 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
 
 
             Assert.IsTrue(_broadcastReceiver.ReceiveNext());
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffsetOne), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffsetOne), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
             Assert.True(_broadcastReceiver.Validate());
 
             Assert.IsTrue(_broadcastReceiver.ReceiveNext());
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffsetTwo), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffsetTwo), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
             Assert.True(_broadcastReceiver.Validate());
 
             A.CallTo(() => _buffer.GetLongVolatile(TailCounterIndex)).MustHaveHappened()
@@ -160,13 +160,13 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
             A.CallTo(() => _buffer.GetInt(RecordDescriptor.GetTypeOffset(recordOffset))).Returns(MsgTypeID);
 
             Assert.IsTrue(_broadcastReceiver.ReceiveNext());
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
             Assert.True(_broadcastReceiver.Validate());
 
-            Assert.Greater(_broadcastReceiver.LappedCount(), 0);
+            Assert.Greater(_broadcastReceiver.LappedCount, 0);
         }
 
 
@@ -197,10 +197,10 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
 
             Assert.IsTrue(_broadcastReceiver.ReceiveNext()); // To catch up to record before padding.
             Assert.IsTrue(_broadcastReceiver.ReceiveNext()); // no skip over the padding and read next record.
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
             Assert.True(_broadcastReceiver.Validate());
         }
 
@@ -222,10 +222,10 @@ namespace Adaptive.Agrona.Tests.Concurrent.Broadcast
             A.CallTo(() => _buffer.GetInt(RecordDescriptor.GetTypeOffset(recordOffset))).Returns(MsgTypeID);
 
             Assert.IsTrue(_broadcastReceiver.ReceiveNext());
-            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId());
-            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer());
-            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset());
-            Assert.AreEqual(length, _broadcastReceiver.Length());
+            Assert.AreEqual(MsgTypeID, _broadcastReceiver.TypeId);
+            Assert.AreEqual(_buffer, _broadcastReceiver.Buffer);
+            Assert.AreEqual(RecordDescriptor.GetMsgOffset(recordOffset), _broadcastReceiver.Offset);
+            Assert.AreEqual(length, _broadcastReceiver.Length);
 
             Assert.False(_broadcastReceiver.Validate()); // Need to receiveNext() to catch up with transmission again.
 

@@ -36,7 +36,6 @@ namespace Adaptive.Agrona.Concurrent.Broadcast
         private long _nextRecord;
         private int _recordOffset;
 
-        private readonly int _capacity;
         private readonly int _tailIntentCounterIndex;
         private readonly int _tailCounterIndex;
 
@@ -55,74 +54,56 @@ namespace Adaptive.Agrona.Concurrent.Broadcast
         public BroadcastReceiver(IAtomicBuffer buffer)
         {
             _buffer = buffer;
-            _capacity = buffer.Capacity - BroadcastBufferDescriptor.TrailerLength;
+            Capacity = buffer.Capacity - BroadcastBufferDescriptor.TrailerLength;
 
-            BroadcastBufferDescriptor.CheckCapacity(_capacity);
+            BroadcastBufferDescriptor.CheckCapacity(Capacity);
             buffer.VerifyAlignment();
 
-            _tailIntentCounterIndex = _capacity + BroadcastBufferDescriptor.TailIntentCounterOffset;
-            _tailCounterIndex = _capacity + BroadcastBufferDescriptor.TailCounterOffset;
-            _latestCounterIndex = _capacity + BroadcastBufferDescriptor.LatestCounterOffset;
+            _tailIntentCounterIndex = Capacity + BroadcastBufferDescriptor.TailIntentCounterOffset;
+            _tailCounterIndex = Capacity + BroadcastBufferDescriptor.TailCounterOffset;
+            _latestCounterIndex = Capacity + BroadcastBufferDescriptor.LatestCounterOffset;
         }
 
         /// <summary>
         /// Get the capacity of the underlying broadcast buffer.
         /// </summary>
         /// <returns> the capacity of the underlying broadcast buffer. </returns>
-        public int Capacity()
-        {
-            return _capacity;
-        }
+        public int Capacity { get; }
 
         /// <summary>
         /// Get the number of times the transmitter has lapped this receiver around the buffer. On each lap
-        /// as least a buffer's worth of loss will be experienced.
+        /// at least a buffer's worth of loss will be experienced.
         /// <para>
         /// <b>Note:</b> This method is threadsafe for calling from an external monitoring thread.
         /// 
         /// </para>
         /// </summary>
         /// <returns> the capacity of the underlying broadcast buffer. </returns>
-        public long LappedCount()
-        {
-            return _lappedCount.Get();
-        }
+        public long LappedCount => _lappedCount.Get();
 
         /// <summary>
         /// Type of the message received.
         /// </summary>
         /// <returns> typeId of the message received. </returns>
-        public int TypeId()
-        {
-            return _buffer.GetInt(RecordDescriptor.GetTypeOffset(_recordOffset));
-        }
+        public int TypeId => _buffer.GetInt(RecordDescriptor.GetTypeOffset(_recordOffset));
 
         /// <summary>
         /// The offset for the beginning of the next message in the transmission stream.
         /// </summary>
         /// <returns> offset for the beginning of the next message in the transmission stream. </returns>
-        public int Offset()
-        {
-            return RecordDescriptor.GetMsgOffset(_recordOffset);
-        }
+        public int Offset => RecordDescriptor.GetMsgOffset(_recordOffset);
 
         /// <summary>
         /// The length of the next message in the transmission stream.
         /// </summary>
         /// <returns> length of the next message in the transmission stream. </returns>
-        public int Length()
-        {
-            return _buffer.GetInt(RecordDescriptor.GetLengthOffset(_recordOffset)) - RecordDescriptor.HeaderLength;
-        }
+        public int Length => _buffer.GetInt(RecordDescriptor.GetLengthOffset(_recordOffset)) - RecordDescriptor.HeaderLength;
 
         /// <summary>
         /// The underlying buffer containing the broadcast message stream.
         /// </summary>
         /// <returns> the underlying buffer containing the broadcast message stream. </returns>
-        public IMutableDirectBuffer Buffer()
-        {
-            return _buffer;
-        }
+        public IMutableDirectBuffer Buffer => _buffer;
 
         /// <summary>
         /// Non-blocking receive of next message from the transmission stream.
@@ -142,14 +123,14 @@ namespace Adaptive.Agrona.Concurrent.Broadcast
 
             if (tail > cursor)
             {
-                var recordOffset = (int) cursor & (_capacity - 1);
+                var recordOffset = (int) cursor & (Capacity - 1);
 
                 if (!Validate(cursor))
                 {
                     _lappedCount.LazySet(_lappedCount.Get() + 1);
 
                     cursor = buffer.GetLong(_latestCounterIndex);
-                    recordOffset = (int) cursor & (_capacity - 1);
+                    recordOffset = (int) cursor & (Capacity - 1);
                 }
 
                 _cursor = cursor;
@@ -180,16 +161,15 @@ namespace Adaptive.Agrona.Concurrent.Broadcast
         /// <returns> true if still valid otherwise false. </returns>
         public bool Validate()
         {
-            // TODO check equivalent semantics
-            // Replaces UNSAFE.loadFence(); Needed to prevent older loads being moved ahead of the validate, see j.u.c.StampedLock.
-            Thread.MemoryBarrier();
+            // UNSAFE.loadFence();
+            Thread.MemoryBarrier();  // Needed to prevent older loads being moved ahead of the validate, see j.u.c.StampedLock.
 
             return Validate(_cursor);
         }
 
         private bool Validate(long cursor)
         {
-            return cursor + _capacity > _buffer.GetLongVolatile(_tailIntentCounterIndex);
+            return cursor + Capacity > _buffer.GetLongVolatile(_tailIntentCounterIndex);
         }
     }
 }
