@@ -217,7 +217,7 @@ namespace Adaptive.Agrona.Concurrent
             ByteBuffer = buffer;
         }
 
-#if DEBUG
+#if DEBUGunsafe
         public virtual void Wrap(IDirectBuffer buffer, int offset, int length)
 #else
         public void Wrap(IDirectBuffer buffer, int offset, int length)
@@ -317,6 +317,12 @@ namespace Adaptive.Agrona.Concurrent
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PutLong(int index, long value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void CheckLimit(int limit)
 #else
@@ -327,6 +333,12 @@ namespace Adaptive.Agrona.Concurrent
             {
                 ThrowHelper.ThrowIndexOutOfRangeException($"limit={limit:D} is beyond capacity={Capacity:D}");
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public long GetLong(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         public bool IsExpandable => false;
@@ -376,6 +388,11 @@ namespace Adaptive.Agrona.Concurrent
             return *(long*) (_pBuffer + index);
         }
 
+        public int GetInt(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void PutLong(int index, long value)
@@ -385,6 +402,11 @@ namespace Adaptive.Agrona.Concurrent
         {
             BoundsCheck0(index, BitUtil.SIZE_OF_LONG);
             *(long*) (_pBuffer + index) = value;
+        }
+
+        public void PutInt(int index, int value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -499,6 +521,11 @@ namespace Adaptive.Agrona.Concurrent
             return *(int*) (_pBuffer + index);
         }
 
+        public double GetDouble(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void PutInt(int index, int value)
@@ -508,6 +535,11 @@ namespace Adaptive.Agrona.Concurrent
         {
             BoundsCheck0(index, BitUtil.SIZE_OF_INT);
             *(int*) (_pBuffer + index) = value;
+        }
+
+        public void PutDouble(int index, double value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -645,6 +677,11 @@ namespace Adaptive.Agrona.Concurrent
             return *(double*) (_pBuffer + index);
         }
 
+        public float GetFloat(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void PutDouble(int index, double value)
@@ -655,6 +692,11 @@ namespace Adaptive.Agrona.Concurrent
             BoundsCheck0(index, BitUtil.SIZE_OF_DOUBLE);
 
             *(double*) (_pBuffer + index) = value;
+        }
+
+        public void PutFloat(int index, float value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -671,6 +713,11 @@ namespace Adaptive.Agrona.Concurrent
             return *(float*) (_pBuffer + index);
         }
 
+        public short GetShort(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void PutFloat(int index, float value)
@@ -681,6 +728,11 @@ namespace Adaptive.Agrona.Concurrent
             BoundsCheck0(index, BitUtil.SIZE_OF_FLOAT);
 
             *(float*) (_pBuffer + index) = value;
+        }
+
+        public void PutShort(int index, short value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -698,6 +750,11 @@ namespace Adaptive.Agrona.Concurrent
             return *(short*) (_pBuffer + index);
         }
 
+        public char GetChar(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual void PutShort(int index, short value)
@@ -708,6 +765,11 @@ namespace Adaptive.Agrona.Concurrent
             BoundsCheck0(index, BitUtil.SIZE_OF_SHORT);
 
             *(short*) (_pBuffer + index) = value;
+        }
+
+        public void PutChar(int index, char value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -935,6 +997,11 @@ namespace Adaptive.Agrona.Concurrent
             return GetStringAscii(index, length);
         }
 
+        public string GetStringUtf8(int index, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if DEBUG
         public virtual string GetStringUtf8(int index, int length)
@@ -961,10 +1028,25 @@ namespace Adaptive.Agrona.Concurrent
             return Encoding.ASCII.GetString(stringInBytes);
         }
 
+        public string GetStringWithoutLengthAscii(int index, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int PutStringWithoutLengthAscii(int index, string value)
+        {
+            throw new NotImplementedException();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int PutStringUtf8(int index, string value)
         {
             return PutStringUtf8(index, value, int.MaxValue);
+        }
+
+        public int PutStringUtf8(int index, string value, ByteOrder byteOrder)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -988,6 +1070,11 @@ namespace Adaptive.Agrona.Concurrent
             PutBytes(index + BitUtil.SIZE_OF_INT, bytes);
 
             return BitUtil.SIZE_OF_INT + bytes.Length;
+        }
+
+        public int PutStringUtf8(int index, string value, ByteOrder byteOrder, int maxEncodedSize)
+        {
+            throw new NotImplementedException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

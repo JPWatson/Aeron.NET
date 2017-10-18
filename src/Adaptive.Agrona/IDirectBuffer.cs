@@ -104,7 +104,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value for at a given index </returns>
-        //long GetLong(int index, ByteOrder byteOrder);
+        long GetLong(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -119,7 +119,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value at a given index. </returns>
-        //int GetInt(int index, ByteOrder byteOrder);
+        int GetInt(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -134,7 +134,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value at a given index. </returns>
-        //double GetDouble(int index, ByteOrder byteOrder);
+        double GetDouble(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -149,7 +149,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value at a given index. </returns>
-        //float GetFloat(int index, ByteOrder byteOrder);
+        float GetFloat(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -164,7 +164,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value at a given index. </returns>
-        //short GetShort(int index, ByteOrder byteOrder);
+        short GetShort(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -179,7 +179,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">     in bytes from which to get. </param>
         ///// <param name="byteOrder"> of the value to be read. </param>
         ///// <returns> the value at a given index. </returns>
-        //char GetChar(int index, ByteOrder byteOrder);
+        char GetChar(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get the value at a given index.
@@ -240,7 +240,7 @@ namespace Adaptive.Agrona
         ///// <param name="index">    at which the String begins. </param>
         ///// <param name="byteOrder"> for the length at the beginning of the String. </param>
         ///// <returns> the String as represented by the UTF-8 encoded bytes. </returns>
-        //string GetStringUtf8(int index, ByteOrder byteOrder);
+        string GetStringUtf8(int index, ByteOrder byteOrder);
 
         /// <summary>
         /// Get part of String from bytes encoded in UTF-8 format that is length prefixed.
@@ -257,6 +257,14 @@ namespace Adaptive.Agrona
         /// <param name="length"> of the String in bytes to decode. </param>
         /// <returns> the String as represented by the ASCII encoded bytes. </returns>
         string GetStringAscii(int index, int length);
+
+        /// <summary>
+        /// Get an encoded ASCII String from the buffer that does not have a length prefix.
+        /// </summary>
+        /// <param name="index"> at which the String begins. </param>
+        /// <param name="length"> of the String in bytes to decode. </param>
+        /// <returns> the String as represented by the ASCII encoded bytes. </returns>
+        string GetStringWithoutLengthAscii(int index, int length);
 
         /// <summary>
         /// Get an encoded UTF-8 String from the buffer that does not have a length prefix.
