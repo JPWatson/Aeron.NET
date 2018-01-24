@@ -161,7 +161,6 @@ namespace Adaptive.Aeron
             return numberEndOfStreams;
         }
 
-
         /// <summary>
         /// Poll the <seealso cref="Image"/>s under the subscription for available message fragments.
         /// <para>
@@ -176,7 +175,7 @@ namespace Adaptive.Aeron
         /// <param name="fragmentHandler"> callback for handling each message fragment as it is read. </param>
         /// <param name="fragmentLimit">   number of message fragments to limit for the poll operation across multiple <seealso cref="Image"/>s. </param>
         /// <returns> the number of fragments received </returns>
-        public int Poll(FragmentHandler fragmentHandler, int fragmentLimit)
+        public int Poll(IFragmentHandler fragmentHandler, int fragmentLimit)
         {
             var images = _fields.images;
             var length = images.Length;
@@ -218,7 +217,7 @@ namespace Adaptive.Aeron
         /// <param name="fragmentLimit">   number of message fragments to limit for the poll operation across multiple <seealso cref="Image"/>s. </param>
         /// <returns> the number of fragments received </returns>
         /// <seealso cref="ControlledFragmentHandler" />
-        public int ControlledPoll(ControlledFragmentHandler fragmentHandler, int fragmentLimit)
+        public int ControlledPoll(IControlledFragmentHandler fragmentHandler, int fragmentLimit)
         {
             var images = _fields.images;
             var length = images.Length;

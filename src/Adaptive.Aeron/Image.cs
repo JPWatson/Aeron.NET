@@ -216,9 +216,9 @@ namespace Adaptive.Aeron
         /// <seealso cref="FragmentAssembler" />
         /// <seealso cref="ImageFragmentAssembler" />
 #if DEBUG
-        public virtual int Poll(FragmentHandler fragmentHandler, int fragmentLimit)
+        public virtual int Poll(IFragmentHandler fragmentHandler, int fragmentLimit)
 #else
-        public int Poll(FragmentHandler fragmentHandler, int fragmentLimit)
+        public int Poll(IFragmentHandler fragmentHandler, int fragmentLimit)
 #endif
         {
             if (_isClosed)
@@ -251,7 +251,7 @@ namespace Adaptive.Aeron
         /// <returns> the number of fragments that have been consumed. </returns>
         /// <seealso cref="ControlledFragmentAssembler" />
         /// <seealso cref="ImageControlledFragmentAssembler" />
-        public int ControlledPoll(ControlledFragmentHandler fragmentHandler, int fragmentLimit)
+        public int ControlledPoll(IControlledFragmentHandler fragmentHandler, int fragmentLimit)
         {
             if (_isClosed)
             {
@@ -286,7 +286,7 @@ namespace Adaptive.Aeron
                     }
                     _header.Offset = frameOffset;
 
-                    var action = fragmentHandler(
+                    var action = fragmentHandler.OnFragment(
                         termBuffer,
                         frameOffset + DataHeaderFlyweight.HEADER_LENGTH,
                         length - DataHeaderFlyweight.HEADER_LENGTH,
@@ -330,10 +330,10 @@ namespace Adaptive.Aeron
 
         /// <summary>
         /// Poll for new messages in a stream. If new messages are found beyond the last consumed position then they
-        /// will be delivered to the <seealso cref="ControlledFragmentHandler"/> up to a limited number of fragments as specified or
+        /// will be delivered to the <seealso cref="IControlledFragmentHandler"/> up to a limited number of fragments as specified or
         /// the maximum position specified.
         /// <para>
-        /// Use a <seealso cref="ControlledFragmentAssembler"/> to assemble messages which span multiple fragments.
+        /// Use a <seealso cref="IControlledFragmentHandler"/> to assemble messages which span multiple fragments.
         ///     
         /// </para>
         /// </summary>
@@ -343,7 +343,7 @@ namespace Adaptive.Aeron
         /// <returns> the number of fragments that have been consumed. </returns>
         /// <seealso cref="ControlledFragmentAssembler"/>
         /// <seealso cref="ImageControlledFragmentAssembler"/>
-        public virtual int BoundedControlledPoll(ControlledFragmentHandler fragmentHandler, long maxPosition,
+        public virtual int BoundedControlledPoll(IControlledFragmentHandler fragmentHandler, long maxPosition,
             int fragmentLimit)
         {
             if (_isClosed)
@@ -380,7 +380,7 @@ namespace Adaptive.Aeron
 
                     _header.Offset = frameOffset;
 
-                    var action = fragmentHandler(termBuffer,
+                    var action = fragmentHandler.OnFragment(termBuffer,
                         frameOffset + DataHeaderFlyweight.HEADER_LENGTH,
                         length - DataHeaderFlyweight.HEADER_LENGTH, _header);
 
@@ -434,7 +434,7 @@ namespace Adaptive.Aeron
         /// <returns> the resulting position after the scan terminates which is a complete message. </returns>
         /// <seealso cref="ControlledFragmentAssembler"/>
         /// <seealso cref="ImageControlledFragmentAssembler"/>
-        public virtual long ControlledPeek(long initialPosition, ControlledFragmentHandler fragmentHandler, long limitPosition)
+        public virtual long ControlledPeek(long initialPosition, IControlledFragmentHandler fragmentHandler, long limitPosition)
         {
             if (_isClosed)
             {
@@ -473,7 +473,7 @@ namespace Adaptive.Aeron
                     _header.Offset = frameOffset;
 
 
-                    var action = fragmentHandler(
+                    var action = fragmentHandler.OnFragment(
                         termBuffer,
                         frameOffset + DataHeaderFlyweight.HEADER_LENGTH,
                         length - DataHeaderFlyweight.HEADER_LENGTH,
