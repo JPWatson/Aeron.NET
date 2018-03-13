@@ -46,7 +46,7 @@ namespace Adaptive.Aeron.LogBuffer
         /// <param name="subscriberPosition"> to be updated after reading with new position </param>
         /// <returns> the number of fragments read </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Read(UnsafeBuffer termBuffer, int termOffset, IFragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler, long currentPosition, IPosition subscriberPosition)
+        public static int Read(UnsafeBuffer termBuffer, int termOffset, FragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler, long currentPosition, IPosition subscriberPosition)
         {
             int fragmentsRead = 0;
             int offset = termOffset;
@@ -68,9 +68,9 @@ namespace Adaptive.Aeron.LogBuffer
 
                     if (!FrameDescriptor.IsPaddingFrame(termBuffer, frameOffset))
                     {
-                        header.Offset= frameOffset;
+                        header.Offset = frameOffset;
 
-                        handler.OnFragment(termBuffer, frameOffset + DataHeaderFlyweight.HEADER_LENGTH, frameLength - DataHeaderFlyweight.HEADER_LENGTH, header);
+                        handler(termBuffer, frameOffset + DataHeaderFlyweight.HEADER_LENGTH, frameLength - DataHeaderFlyweight.HEADER_LENGTH, header);
 
                         ++fragmentsRead;
                     }
@@ -94,6 +94,27 @@ namespace Adaptive.Aeron.LogBuffer
         }
 
         /// <summary>
+        /// Reads data from a term in a log buffer and updates a passed <seealso cref="IPosition"/> so progress is not lost in the
+        /// event of an exception.
+        ///     
+        /// If a fragmentsLimit of 0 or less is passed then at least one read will be attempted.
+        /// </summary>
+        /// <param name="termBuffer">         to be read for fragments. </param>
+        /// <param name="termOffset">         within the buffer that the read should begin. </param>
+        /// <param name="handler">            the handler for data that has been read </param>
+        /// <param name="fragmentsLimit">     limit the number of fragments read. </param>
+        /// <param name="header">             to be used for mapping over the header for a given fragment. </param>
+        /// <param name="errorHandler">       to be notified if an error occurs during the callback. </param>
+        /// <param name="currentPosition">    prior to reading further fragments </param>
+        /// <param name="subscriberPosition"> to be updated after reading with new position </param>
+        /// <returns> the number of fragments read </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Read(UnsafeBuffer termBuffer, int termOffset, IFragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler, long currentPosition, IPosition subscriberPosition)
+        {
+            return Read(termBuffer, termOffset, handler.OnFragment, fragmentsLimit, header, errorHandler, currentPosition, subscriberPosition);
+        }
+
+        /// <summary>
         /// Reads data from a term in a log buffer.
         /// 
         /// If a fragmentsLimit of 0 or less is passed then at least one read will be attempted.
@@ -108,7 +129,7 @@ namespace Adaptive.Aeron.LogBuffer
         /// <param name="errorHandler">   to be notified if an error occurs during the callback. </param>
         /// <returns> the number of fragments read </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long Read(UnsafeBuffer termBuffer, int offset, IFragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler)
+        public static long Read(UnsafeBuffer termBuffer, int offset, FragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler)
         {
             int fragmentsRead = 0;
             int capacity = termBuffer.Capacity;
@@ -130,7 +151,7 @@ namespace Adaptive.Aeron.LogBuffer
                     {
                         header.SetBuffer(termBuffer, termOffset);
 
-                        handler.OnFragment(termBuffer, termOffset + DataHeaderFlyweight.HEADER_LENGTH, frameLength - DataHeaderFlyweight.HEADER_LENGTH, header);
+                        handler(termBuffer, termOffset + DataHeaderFlyweight.HEADER_LENGTH, frameLength - DataHeaderFlyweight.HEADER_LENGTH, header);
 
                         ++fragmentsRead;
                     }
@@ -145,6 +166,26 @@ namespace Adaptive.Aeron.LogBuffer
         }
 
         /// <summary>
+        /// Reads data from a term in a log buffer.
+        /// 
+        /// If a fragmentsLimit of 0 or less is passed then at least one read will be attempted.
+        /// Note: this method has users outside of Aeron
+        /// 
+        /// </summary>
+        /// <param name="termBuffer">     to be read for fragments. </param>
+        /// <param name="offset">         offset within the buffer that the read should begin. </param>
+        /// <param name="handler">        the handler for data that has been read </param>
+        /// <param name="fragmentsLimit"> limit the number of fragments read. </param>
+        /// <param name="header">         to be used for mapping over the header for a given fragment. </param>
+        /// <param name="errorHandler">   to be notified if an error occurs during the callback. </param>
+        /// <returns> the number of fragments read </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long Read(UnsafeBuffer termBuffer, int offset, IFragmentHandler handler, int fragmentsLimit, Header header, ErrorHandler errorHandler)
+        {
+            return Read(termBuffer, offset, handler.OnFragment, fragmentsLimit, header, errorHandler);
+        }
+
+        /// <summary>
         /// Pack the values for fragmentsRead and offset into a long for returning on the stack.
         /// </summary>
         /// <param name="offset">        value to be packed. </param>
@@ -153,7 +194,7 @@ namespace Adaptive.Aeron.LogBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long Pack(int offset, int fragmentsRead)
         {
-            return ((long)offset << 32) | (uint)fragmentsRead;
+            return ((long) offset << 32) | (uint) fragmentsRead;
         }
 
         /// <summary>
@@ -164,7 +205,7 @@ namespace Adaptive.Aeron.LogBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FragmentsRead(long readOutcome)
         {
-            return (int)readOutcome;
+            return (int) readOutcome;
         }
 
         /// <summary>
@@ -175,7 +216,7 @@ namespace Adaptive.Aeron.LogBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Offset(long readOutcome)
         {
-            return (int)((long)((ulong)readOutcome >> 32));
+            return (int) ((long) ((ulong) readOutcome >> 32));
         }
     }
 }
