@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <PackageId>Aeron.Driver</PackageId>
+    <VersionPrefix>1.7.4</VersionPrefix>
+    <Authors>Adaptive Financial Consulting Ltd.</Authors>
+    <Company>Adaptive Financial Consulting Ltd.</Company>
+    <Product>Aeron Driver</Product>
+    <Copyright>Copyright 2018</Copyright>
+    <PackageLicenseUrl>https://github.com/AdaptiveConsulting/Aeron.NET/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/AdaptiveConsulting/Aeron.NET/</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/AdaptiveConsulting/Aeron.NET/master/images/adaptive.png</PackageIconUrl>
+    <Description>Aeron Media Driver for use with Aeron.Client.</Description>
+    <PackageTags>aeron driver messaging networking transport udp ipc</PackageTags>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="media-driver.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInPackage>true</IncludeInPackage>
+      <PackagePath>lib\net45;lib\netstandard2.0;content\driver\media-driver.jar</PackagePath>
+    </Content>
+    <Content Include="start-media-driver.bat">
+      <IncludeInPackage>true</IncludeInPackage>
+      <PackagePath>content\driver\start-media-driver.bat</PackagePath>
+    </Content>
+    <Content Include="aeron-stat.bat">
+      <IncludeInPackage>true</IncludeInPackage>
+      <PackagePath>content\driver\aeron-stat.bat</PackagePath>
+    </Content>
+    <Content Include="errors.bat">
+      <IncludeInPackage>true</IncludeInPackage>
+      <PackagePath>content\driver\errors.bat</PackagePath>
+    </Content>
+    <Content Include="readme.txt">
+      <IncludeInPackage>true</IncludeInPackage>
+      <PackagePath>
+      </PackagePath>
+    </Content>
+  </ItemGroup>
+</Project>
