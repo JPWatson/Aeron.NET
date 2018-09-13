@@ -183,7 +183,7 @@ namespace Adaptive.Agrona
             BoundsCheck0(index, length);
         }
 
-        public bool IsExpandable { get; }
+        public bool IsExpandable => true;
 
         public void SetMemory(int index, int length, byte value)
         {
