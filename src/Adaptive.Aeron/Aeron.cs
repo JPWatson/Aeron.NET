@@ -167,17 +167,21 @@ namespace Adaptive.Aeron
             {
                 if (null != _conductorRunner)
                 {
+                    _conductor.ClientClose();
                     _conductorRunner.Dispose();
                     if (!_conductorRunner.IsClosed)
                     {
-                        throw new AeronException("failed to close Aeron client");
+                        _isClosed.Set(false);
+                        throw new AeronException("failed to close Aeron client - possibly due to thread interrupt");
                     }
                 }
                 else
                 {
+                    _conductor.ClientClose();
                     _conductorInvoker.Dispose();
                     if (!_conductorInvoker.IsClosed)
                     {
+                        _isClosed.Set(false);
                         throw new AeronException("failed to close Aeron client");
                     }
                 }

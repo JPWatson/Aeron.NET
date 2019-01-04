@@ -11,6 +11,8 @@ using Adaptive.Archiver;
 using Adaptive.Archiver.Codecs;
 using Adaptive.Cluster.Client;
 using Adaptive.Cluster.Codecs;
+using static Adaptive.Aeron.Aeron;
+using static Adaptive.Archiver.AeronArchive;
 using MessageHeaderEncoder = Adaptive.Cluster.Codecs.MessageHeaderEncoder;
 
 namespace Adaptive.Cluster.Service
@@ -38,7 +40,8 @@ namespace Adaptive.Cluster.Service
         private long ackId = 0;
         private long clusterTimeMs;
         private long cachedTimeMs;
-        private int memberId = Adaptive.Aeron.Aeron.NULL_VALUE;
+        private long terminationPosition = NULL_POSITION;
+        private int memberId = NULL_VALUE;
         private BoundedLogAdapter logAdapter;
         private AtomicCounter heartbeatCounter;
         private ReadableCounter roleCounter;
@@ -221,7 +224,7 @@ namespace Adaptive.Cluster.Service
             {
                 return Publication.NOT_CONNECTED;
             }
-            
+
             _egressMessageHeaderEncoder
                 .ClusterSessionId(clusterSessionId)
                 .Timestamp(clusterTimeMs);
@@ -246,6 +249,11 @@ namespace Adaptive.Cluster.Service
 
             activeLogEvent = new ActiveLogEvent(
                 leadershipTermId, logPosition, maxLogPosition, memberId, logSessionId, logStreamId, logChannel);
+        }
+
+        public void OnServiceTerminationPosition(long logPosition)
+        {
+            terminationPosition = logPosition;
         }
 
         internal void OnSessionMessage(
@@ -352,7 +360,7 @@ namespace Adaptive.Cluster.Service
             clusterTimeMs = RecoveryState.GetTimestamp(counters, recoveryCounterId);
             long leadershipTermId = RecoveryState.GetLeadershipTermId(counters, recoveryCounterId);
 
-            if (Adaptive.Aeron.Aeron.NULL_VALUE != leadershipTermId)
+            if (NULL_VALUE != leadershipTermId)
             {
                 LoadSnapshot(RecoveryState.GetSnapshotRecordingId(counters, recoveryCounterId, serviceId));
             }
@@ -528,11 +536,11 @@ namespace Adaptive.Cluster.Service
 
         private void LoadSnapshot(long recordingId)
         {
-            using (AeronArchive archive = AeronArchive.Connect(archiveCtx))
+            using (AeronArchive archive = Connect(archiveCtx))
             {
                 string channel = ctx.ReplayChannel();
                 int streamId = ctx.ReplayStreamId();
-                int sessionId = (int) archive.StartReplay(recordingId, 0, Adaptive.Aeron.Aeron.NULL_VALUE, channel, streamId);
+                int sessionId = (int) archive.StartReplay(recordingId, 0, NULL_VALUE, channel, streamId);
 
                 string replaySessionChannel = ChannelUri.AddSessionId(channel, sessionId);
                 using (Subscription subscription = aeron.AddSubscription(replaySessionChannel, streamId))
@@ -573,7 +581,7 @@ namespace Adaptive.Cluster.Service
         {
             long recordingId;
 
-            using (AeronArchive archive = AeronArchive.Connect(archiveCtx))
+            using (AeronArchive archive = Connect(archiveCtx))
             using (Publication publication = aeron.AddExclusivePublication(ctx.SnapshotChannel(), ctx.SnapshotStreamId()))
             {
                 var channel = ChannelUri.AddSessionId(ctx.SnapshotChannel(), publication.SessionId);
@@ -638,26 +646,9 @@ namespace Adaptive.Cluster.Service
 
         private void ExecuteAction(ClusterAction action, long position, long leadershipTermId)
         {
-            if (isRecovering)
+            if (ClusterAction.SNAPSHOT == action)
             {
-                return;
-            }
-
-            switch (action)
-            {
-                case ClusterAction.SNAPSHOT:
-                    _consensusModuleProxy.Ack(position, ackId++, OnTakeSnapshot(position, leadershipTermId), serviceId);
-                    break;
-
-                case ClusterAction.SHUTDOWN:
-                    _consensusModuleProxy.Ack(position, ackId++, OnTakeSnapshot(position, leadershipTermId), serviceId);
-                    ctx.TerminationHook().Invoke();
-                    break;
-
-                case ClusterAction.ABORT:
-                    _consensusModuleProxy.Ack(position, ackId++, serviceId);
-                    ctx.TerminationHook().Invoke();
-                    break;
+                _consensusModuleProxy.Ack(position, ackId++, OnTakeSnapshot(position, leadershipTermId), serviceId);
             }
         }
 
@@ -719,6 +710,21 @@ namespace Adaptive.Cluster.Service
             if (null != activeLogEvent && null == logAdapter)
             {
                 JoinActiveLog();
+            }
+
+            if (NULL_POSITION != terminationPosition)
+            {
+                CheckForTermination();
+            }
+        }
+
+        private void CheckForTermination()
+        {
+            if (null != logAdapter && logAdapter.Position() >= terminationPosition)
+            {
+                _consensusModuleProxy.Ack(terminationPosition, ackId++, serviceId);
+                terminationPosition = NULL_POSITION;
+                ctx.TerminationHook().Invoke();
             }
         }
     }

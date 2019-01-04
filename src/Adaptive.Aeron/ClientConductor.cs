@@ -109,26 +109,36 @@ namespace Adaptive.Aeron
         public void OnClose()
         {
             _clientLock.Lock();
-
             try
             {
                 if (!_isClosed)
                 {
                     _isClosed = true;
 
-                    int lingeringResourcesSize = _lingeringResources.Count;
                     ForceCloseResources();
-
-                    if (_lingeringResources.Count > lingeringResourcesSize)
-                    {
-                        Aeron.Sleep(15);
-                    }
+                    Thread.Yield();
 
                     for (int i = 0, size = _lingeringResources.Count; i < size; i++)
                     {
                         _lingeringResources[i].Delete();
                     }
 
+                    _driverProxy.ClientClose();
+                }
+            }
+            finally
+            {
+                _clientLock.Unlock();
+            }
+        }
+        
+        internal void ClientClose()
+        {
+            _clientLock.Lock();
+            try
+            {
+                if (!_isClosed)
+                {
                     _driverProxy.ClientClose();
                 }
             }
@@ -180,7 +190,7 @@ namespace Adaptive.Aeron
         public void OnChannelEndpointError(int statusIndicatorId, string message)
         {
             var resourcesToRemove = new List<long>();
-            
+
             try
             {
                 foreach (var item in _resourceByRegIdMap)
@@ -763,6 +773,7 @@ namespace Adaptive.Aeron
                 }
                 catch (ThreadInterruptedException)
                 {
+                    OnClose();
                     Thread.CurrentThread.Interrupt();
                     throw;
                 }
@@ -779,7 +790,15 @@ namespace Adaptive.Aeron
                     return;
                 }
 
-                Thread.Sleep(0); // check interrupt
+                try
+                {
+                    Thread.Sleep(0); // check interrupt
+                }
+                catch (ThreadInterruptedException)
+                {
+                    OnClose();
+                    throw;
+                }
             } while (deadlineNs - _nanoClock.NanoTime() > 0);
 
             throw new DriverTimeoutException("no response from MediaDriver within (ms):" + _driverTimeoutMs);
@@ -828,7 +847,6 @@ namespace Adaptive.Aeron
                 if (_epochClock.Time() > (_driverProxy.TimeOfLastDriverKeepaliveMs() + _driverTimeoutMs))
                 {
                     OnClose();
-
                     throw new DriverTimeoutException("MediaDriver keepalive older than (ms): " + _driverTimeoutMs);
                 }
 
